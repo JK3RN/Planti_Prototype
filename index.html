@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pflanzen Planer Pro</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+            background-color: #f0f0f0;
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            padding: 25px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            max-width: 90%;
+            width: 350px;
+        }
+        h1 {
+            color: #2c5b2c;
+            margin-top: 0;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .section {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        #result, #compass-result {
+            margin-top: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        #luxValue, #compass-info {
+            font-size: 14px;
+            font-weight: normal;
+            color: #666;
+            margin-top: 5px;
+        }
+        #error {
+            color: #d9534f;
+            margin-top: 15px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Pflanzen Planer Pro</h1>
+        
+        <div class="section">
+            <p>1. Miss das Licht am aktuellen Standort.</p>
+            <button id="scanButton">Lichtstärke prüfen</button>
+            <div id="result"></div>
+            <div id="error"></div>
+        </div>
+
+        <div class="section">
+            <p>2. Finde die beste Fensterseite.</p>
+            <button id="compassButton">Sonnenverlauf analysieren</button>
+            <div id="compass-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- TEIL 1: LICHTSCANNER ---
+        const scanButton = document.getElementById('scanButton');
+        const resultDiv = document.getElementById('result');
+        const errorDiv = document.getElementById('error');
+
+        scanButton.addEventListener('click', () => {
+            resultDiv.innerHTML = '';
+            errorDiv.innerHTML = 'Sensor wird gestartet...';
+            if ('AmbientLightSensor' in window) {
+                navigator.permissions.query({ name: 'ambient-light-sensor' }).then(permissionStatus => {
+                    if (permissionStatus.state === 'denied') {
+                        errorDiv.innerHTML = 'Zugriff auf den Lichtsensor verweigert.';
+                        return;
+                    }
+                    try {
+                        const sensor = new AmbientLightSensor({ frequency: 10 });
+                        sensor.onreading = () => {
+                            const lux = sensor.illuminance;
+                            let category = lux < 5000 ? 'Schattig' : (lux < 20000 ? 'Halbschatten' : 'Sonnig');
+                            let emoji = lux < 5000 ? '🌒' : (lux < 20000 ? '⛅️' : '☀️');
+                            resultDiv.innerHTML = `<div>${emoji} ${category}</div><div id="luxValue">${Math.round(lux)} Lux</div>`;
+                            sensor.stop();
+                            errorDiv.innerHTML = '';
+                        };
+                        sensor.onerror = (event) => {
+                            errorDiv.innerHTML = `Fehler: ${event.error.name}`;
+                            sensor.stop();
+                        };
+                        sensor.start();
+                    } catch (error) {
+                        errorDiv.innerHTML = `Initialisierungsfehler: ${error.name}`;
+                    }
+                });
+            } else {
+                errorDiv.textContent = 'Lichtsensor nicht unterstützt.';
+            }
+        });
+
+        // --- TEIL 2: SONNEN-KOMPASS ---
+        const compassButton = document.getElementById('compassButton');
+        const compassResultDiv = document.getElementById('compass-result');
+
+        compassButton.addEventListener('click', () => {
+            compassResultDiv.innerHTML = 'Bitte Standort freigeben...';
+            
+            // 1. Standort abfragen
+            navigator.geolocation.getCurrentPosition(position => {
+                const { latitude, longitude } = position.coords;
+                compassResultDiv.innerHTML = 'Halte dein Handy in die gewünschte Richtung.';
+
+                // 2. Kompass-Listener starten
+                window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+
+            }, error => {
+                compassResultDiv.innerHTML = 'Standortzugriff verweigert.';
+            });
+        });
+
+        function handleOrientation(event) {
+            // event.alpha ist der Kompasswert: 0=Nord, 90=Ost, 180=Süd, 270=West
+            let heading = event.alpha;
+            if (typeof heading !== 'number' || isNaN(heading)) {
+                compassResultDiv.innerHTML = 'Kompass nicht verfügbar.';
+                return;
+            }
+
+            // Himmelsrichtung als Text
+            let direction = 'Norden';
+            if (heading > 337.5 || heading <= 22.5) direction = 'Norden';
+            else if (heading > 22.5 && heading <= 67.5) direction = 'Nord-Ost';
+            else if (heading > 67.5 && heading <= 112.5) direction = 'Osten';
+            else if (heading > 112.5 && heading <= 157.5) direction = 'Süd-Ost';
+            else if (heading > 157.5 && heading <= 202.5) direction = 'Süden';
+            else if (heading > 202.5 && heading <= 247.5) direction = 'Süd-West';
+            else if (heading > 247.5 && heading <= 292.5) direction = 'Westen';
+            else if (heading > 292.5 && heading <= 337.5) direction = 'Nord-West';
+            
+            // Sonnen-Analyse für diese Richtung
+            let sunAnalysis = getSunAnalysisForDirection(direction);
+
+            compassResultDiv.innerHTML = `
+                <div>Richtung: <strong>${direction}</strong></div>
+                <div id="compass-info">${sunAnalysis}</div>
+            `;
+        }
+
+        function getSunAnalysisForDirection(direction) {
+            switch (direction) {
+                case 'Norden': return 'Keine direkte Sonne. Ideal für Schattenpflanzen.';
+                case 'Nord-Ost': return 'Morgensonne. Gut für sanftes Licht.';
+                case 'Osten': return 'Direkte Vormittagssonne. Gut für viele Pflanzen.';
+                case 'Süd-Ost': return 'Viel Sonne am Vormittag und mittags.';
+                case 'Süden': return 'Stärkste, meiste Sonne. Ideal für Sonnenanbeter.';
+                case 'Süd-West': return 'Starke Nachmittagssonne.';
+                case 'Westen': return 'Direkte Abendsonne. Kann im Sommer intensiv sein.';
+                case 'Nord-West': return 'Wenig Abendsonne.';
+                default: return '';
+            }
+        }
+    </script>
+</body>
+</html>
