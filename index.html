@@ -6,8 +6,8 @@
     <title>Pflanzen Planer Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/suncalc/1.9.0/suncalc.min.js"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; background-color: #f0f0f0; color: #333; text-align: center; }
-        .container { padding: 25px; background-color: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 90%; width: 350px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px 0; background-color: #f0f0f0; color: #333; }
+        .container { padding: 25px; background-color: white; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 90%; width: 350px; text-align: center; }
         h1 { color: #2c5b2c; margin-top: 0; }
         button { padding: 12px 25px; font-size: 16px; font-weight: bold; color: white; background-color: #4CAF50; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; width: 100%; margin-bottom: 10px; }
         button:hover { background-color: #45a049; }
@@ -19,6 +19,28 @@
         .simulation-controls label { display: block; margin-bottom: 5px; font-weight: bold; }
         .simulation-controls input[type="range"] { width: 100%; }
         .mode-switch { display: flex; align-items: center; justify-content: center; margin-top: 20px; }
+        
+        /* === NEUES STYLING FÜR DEN FOOTER === */
+        footer {
+            width: 100%;
+            text-align: center;
+            margin-top: 4rem; /* Großer Abstand nach oben */
+            padding: 2rem 1rem; /* Innenabstand oben/unten und seitlich */
+            border-top: 1px solid #e0e0e0; /* Feine Trennlinie */
+            color: #666; /* Dezente Textfarbe */
+            font-size: 0.875rem; /* Etwas kleinerer Text */
+        }
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+        footer a {
+            color: #4CAF50; /* Passend zum Button-Grün */
+            text-decoration: underline;
+            transition: color 0.3s;
+        }
+        footer a:hover {
+            color: #45a049; /* Passend zum Button-Hover-Grün */
+        }
     </style>
 </head>
 <body>
@@ -52,14 +74,12 @@
             <div id="compass-result"></div>
         </div>
     </div>
-<footer class="text-center mt-16 py-8 border-t border-gray-200">
-    <div class="max-w-5xl mx-auto px-4 text-sm text-gray-500">
-        <p class="mb-2">&copy; 2024 Pflanzen Planer Pro - Ein Projekt von [Dein Name]</p>
-        <a href="infografik_pflanzen_planer_pro.html" target="_blank" class="text-[#A49E9E] hover:text-[#5A5A5A] hover:underline transition-colors duration-300">
-            Zur Projekt-Infografik & Analyse
-        </a>
-    </div>
-</footer>
+
+    <footer>
+        <p>&copy; 2024 Pflanzen Planer Pro - Ein Projekt von [Dein Name]</p>
+        <a href="infografik_pflanzen_planer_pro.html" target="_blank">Zur Projekt-Infografik & Analyse</a>
+    </footer>
+
     <script>
         // --- UI-ELEMENTE ---
         const simulationMode = document.getElementById('simulationMode');
@@ -82,24 +102,20 @@
             if (simulationMode.checked) {
                 window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
                 updateLight(parseInt(luxSlider.value, 10)); 
-                // FIX: Den Wert vom Slider in eine Zahl umwandeln
                 updateCompass(parseInt(compassSlider.value, 10)); 
             }
         });
         luxSlider.addEventListener('input', () => {
             luxSliderValue.textContent = luxSlider.value;
-            if (simulationMode.checked) updateLight(parseInt(luxSlider.value, 10)); // FIX: Auch hier umwandeln
+            if (simulationMode.checked) updateLight(parseInt(luxSlider.value, 10));
         });
         compassSlider.addEventListener('input', () => {
             compassSliderValue.textContent = compassSlider.value;
-            // FIX: Den Wert vom Slider in eine Zahl umwandeln
             if (simulationMode.checked) updateCompass(parseInt(compassSlider.value, 10));
         });
 
         // --- KERNLOGIK ---
         function updateLight(lux) {
-            // Die Light-Funktion war nicht betroffen, da sie keine strenge Typ-Prüfung hatte,
-            // aber zur Sicherheit wandeln wir den Wert auch hier um.
             let luxAsNumber = parseInt(lux, 10);
             let category = luxAsNumber < 5000 ? 'Schattig' : (luxAsNumber < 20000 ? 'Halbschatten' : 'Sonnig');
             let emoji = luxAsNumber < 5000 ? '🌒' : (luxAsNumber < 20000 ? '⛅️' : '☀️');
@@ -116,7 +132,6 @@
         }
 
         function updateCompass(heading) {
-            // Diese Funktion erwartet jetzt dank unserer Korrektur immer eine Zahl.
             if (typeof heading !== 'number' || isNaN(heading)) return; 
             let direction = 'Norden';
             if (heading > 337.5 || heading <= 22.5) direction = 'Norden';
@@ -148,7 +163,7 @@
         // --- EVENT LISTENERS FÜR BUTTONS (JETZT MIT IF/ELSE) ---
         scanButton.addEventListener('click', () => {
             if (simulationMode.checked) {
-                updateLight(parseInt(luxSlider.value, 10)); // FIX: Den Wert vom Slider in eine Zahl umwandeln
+                updateLight(parseInt(luxSlider.value, 10));
             } else {
                 // MODUS: ECHTE SENSOREN
                 errorDiv.innerHTML = 'Sensor wird gestartet...';
@@ -181,7 +196,7 @@
 
         compassButton.addEventListener('click', () => {
             if (simulationMode.checked) {
-                updateCompass(parseInt(compassSlider.value, 10)); // FIX: Den Wert vom Slider in eine Zahl umwandeln
+                updateCompass(parseInt(compassSlider.value, 10));
             } else {
                 // MODUS: ECHTE SENSOREN
                 compassResultDiv.innerHTML = 'Bitte Standort freigeben...';
