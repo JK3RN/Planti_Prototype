@@ -72,19 +72,24 @@
         // --- SIMULATOR-LOGIK ---
         simulationMode.addEventListener('change', () => {
             simulatorDiv.style.display = simulationMode.checked ? 'block' : 'none';
+            if (simulationMode.checked) {
+                // Stoppe den echten Kompass-Listener, falls er läuft
+                window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+                // Setze die Anzeigen auf die aktuellen Slider-Werte zurück
+                updateLight(luxSlider.value);
+                updateCompass(compassSlider.value);
+            }
         });
-
         luxSlider.addEventListener('input', () => {
             luxSliderValue.textContent = luxSlider.value;
             if (simulationMode.checked) updateLight(luxSlider.value);
         });
-
         compassSlider.addEventListener('input', () => {
             compassSliderValue.textContent = compassSlider.value;
             if (simulationMode.checked) updateCompass(compassSlider.value);
         });
 
-        // --- KERNFUNKTIONEN (UMGEBAUT) ---
+        // --- KERNLOGIK ---
         function updateLight(lux) {
             let category = lux < 5000 ? 'Schattig' : (lux < 20000 ? 'Halbschatten' : 'Sonnig');
             let emoji = lux < 5000 ? '🌒' : (lux < 20000 ? '⛅️' : '☀️');
@@ -92,7 +97,17 @@
             errorDiv.innerHTML = '';
         }
 
+        function handleOrientation(event) {
+            // Beende die Funktion, falls der Nutzer inzwischen in den Sim-Modus gewechselt hat
+            if (simulationMode.checked) {
+                window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+                return;
+            }
+            updateCompass(event.alpha);
+        }
+
         function updateCompass(heading) {
+            if (typeof heading !== 'number' || isNaN(heading)) return;
             let direction = 'Norden';
             if (heading > 337.5 || heading <= 22.5) direction = 'Norden';
             else if (heading > 22.5 && heading <= 67.5) direction = 'Nord-Ost';
@@ -102,13 +117,11 @@
             else if (heading > 202.5 && heading <= 247.5) direction = 'Süd-West';
             else if (heading > 247.5 && heading <= 292.5) direction = 'Westen';
             else if (heading > 292.5 && heading <= 337.5) direction = 'Nord-West';
-
             let sunAnalysis = getSunAnalysisForDirection(direction);
             compassResultDiv.innerHTML = `<div>Richtung: <strong>${direction}</strong></div><div id="compass-info">${sunAnalysis}</div>`;
         }
 
         function getSunAnalysisForDirection(direction) {
-            // Diese Logik könnte später durch echte SunCalc-Daten ersetzt werden
             switch (direction) {
                 case 'Norden': return 'Keine direkte Sonne. Ideal für Schattenpflanzen.';
                 case 'Nord-Ost': return 'Morgensonne. Gut für sanftes Licht.';
@@ -122,21 +135,53 @@
             }
         }
 
-        // --- EVENT LISTENER FÜR BUTTONS ---
+        // --- EVENT LISTENERS FÜR BUTTONS (JETZT MIT IF/ELSE) ---
         scanButton.addEventListener('click', () => {
             if (simulationMode.checked) {
                 updateLight(luxSlider.value);
-                return;
+            } else {
+                // MODUS: ECHTE SENSOREN
+                errorDiv.innerHTML = 'Sensor wird gestartet...';
+                if ('AmbientLightSensor' in window) {
+                    navigator.permissions.query({ name: 'ambient-light-sensor' }).then(permissionStatus => {
+                        if (permissionStatus.state === 'denied') {
+                            errorDiv.innerHTML = 'Zugriff auf den Lichtsensor verweigert.';
+                            return;
+                        }
+                        try {
+                            const sensor = new AmbientLightSensor({ frequency: 10 });
+                            sensor.onreading = () => {
+                                updateLight(sensor.illuminance);
+                                sensor.stop();
+                            };
+                            sensor.onerror = (event) => {
+                                errorDiv.innerHTML = `Fehler: ${event.error.name}`;
+                                sensor.stop();
+                            };
+                            sensor.start();
+                        } catch (error) {
+                            errorDiv.innerHTML = `Initialisierungsfehler: ${error.name}`;
+                        }
+                    });
+                } else {
+                    errorDiv.textContent = 'Lichtsensor nicht unterstützt.';
+                }
             }
-            // ... (Hier folgt der Code für den echten Lichtsensor) ...
         });
 
         compassButton.addEventListener('click', () => {
             if (simulationMode.checked) {
                 updateCompass(compassSlider.value);
-                return;
+            } else {
+                // MODUS: ECHTE SENSOREN
+                compassResultDiv.innerHTML = 'Bitte Standort freigeben...';
+                navigator.geolocation.getCurrentPosition(position => {
+                    compassResultDiv.innerHTML = 'Halte dein Handy in die gewünschte Richtung.';
+                    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                }, error => {
+                    compassResultDiv.innerHTML = 'Standortzugriff verweigert.';
+                });
             }
-            // ... (Hier folgt der Code für den echten Kompass & Standort) ...
         });
     </script>
 </body>
