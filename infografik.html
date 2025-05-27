@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Visualization & Content Choices: 
+        - Einleitung: Großer Text, Problem/Lösung-Darstellung. Goal: Inform.
+        - Kernfunktionen: Karten mit Icons (Unicode) & Text. Goal: Inform. Viz: HTML/CSS.
+        - Nutzer-Vorteile: Liste mit Icons (Unicode). Goal: Inform. Viz: HTML/CSS.
+        - Technologie-Einblick: Vereinfachtes Diagramm der APIs. Goal: Organize. Viz: HTML/CSS (Flowchart-Stil).
+        - SWOT-Analyse: 4 Karten-Layout. Goal: Organize/Compare. Viz: HTML/CSS.
+        - Zukunftsvision: Donut-Chart für Feature-Priorisierung (Chart.js). Goal: Compare/Inform.
+        - Weg zur iOS-App: Vergleichstabelle (Native vs. Cross-Platform). Goal: Compare. Viz: HTML `<table>`.
+        - Alle Diagramme mit Chart.js (Canvas), keine SVG/Mermaid. Label-Wrapping und Tooltip-Konfiguration implementiert.
+    -->
+    <title>Infografik: Pflanzen Planer Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F3; /* Creamy White */
+            color: #5A5A5A; /* Dark Grey */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 350px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 320px;
+                max-height: 400px;
+            }
+        }
+        .hero-title { color: #B0C4B1; /* Soft Green */ }
+        .section-title { color: #B0C4B1; /* Soft Green */ border-bottom: 2px solid #D8D8D8; /* Light Grey */ padding-bottom: 0.5rem; }
+        .card { background-color: #FFFFFF; border: 1px solid #D8D8D8; /* Light Grey */ border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .stat-number { font-size: 2.5rem; font-weight: 700; line-height: 1; color: #A49E9E; /* Muted Taupe */ }
+        .flow-step { border: 2px solid #B0C4B1; /* Soft Green */ padding: 1rem; border-radius: 0.5rem; text-align: center; background-color: #FFFFFF; }
+        .flow-arrow { font-size: 1.5rem; color: #B0C4B1; align-self: center; }
+        .swot-category h3 { color: #A49E9E; /* Muted Taupe */ }
+        table th, table td { border: 1px solid #D8D8D8; padding: 0.75rem; text-align: left; }
+        table th { background-color: #F0F0F0; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="antialiased leading-relaxed">
+
+    <header class="bg-white py-12 px-4 text-center border-b-2 border-[#D8D8D8]">
+        <h1 class="text-4xl md:text-5xl font-bold hero-title mb-3">Pflanzen Planer Pro</h1>
+        <p class="text-xl md:text-2xl text-[#5A5A5A] max-w-3xl mx-auto">Die datengesteuerte Lösung für optimale Pflanzenstandorte und gesünderes Wachstum.</p>
+    </header>
+
+    <main class="max-w-5xl mx-auto p-4 md:p-8">
+
+        <section id="intro" class="mb-12 md:mb-16">
+            <h2 class="text-3xl font-semibold section-title mb-6 text-center">Das Problem: Unsicherheit bei der Pflanzenpflege</h2>
+            <p class="text-lg mb-6 text-center max-w-3xl mx-auto">Viele Pflanzenfreunde kämpfen mit vagen Pflegehinweisen. "Hell, aber nicht sonnig?" Was bedeutet das genau? Falsche Lichtverhältnisse führen oft zu kränklichen Pflanzen. Der "Pflanzen Planer Pro" tritt an, um diese Unsicherheit durch präzise, datenbasierte Empfehlungen zu beseitigen.</p>
+            <div class="card p-6 text-center">
+                <p class="text-xl font-semibold mb-2">Unsere Mission:</p>
+                <p class="text-2xl text-[#A49E9E]">Jedem Pflanzenliebhaber das Vertrauen und die Werkzeuge für eine erfolgreiche Pflanzenpflege geben.</p>
+            </div>
+        </section>
+
+        <section id="core-features" class="mb-12 md:mb-16">
+            <h2 class="text-3xl font-semibold section-title mb-8 text-center">Kernfunktionen im Überblick</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card p-6 text-center">
+                    <span class="text-4xl mb-3 block">💡</span>
+                    <h3 class="text-xl font-semibold mb-2">Licht-Scanner</h3>
+                    <p class="text-sm">Misst präzise die Lichtintensität (Lux) am Standort und klassifiziert sie (Sonnig, Halbschatten, Schattig).</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <span class="text-4xl mb-3 block">🧭</span>
+                    <h3 class="text-xl font-semibold mb-2">Sonnen-Kompass</h3>
+                    <p class="text-sm">Bestimmt die Himmelsrichtung und gibt eine Einschätzung zum erwarteten Sonnenlicht am Fenster.</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <span class="text-4xl mb-3 block">⚙️</span>
+                    <h3 class="text-xl font-semibold mb-2">Simulations-Modus</h3>
+                    <p class="text-sm">Ermöglicht manuelle Eingabe von Werten für Tests und Entwicklung auf allen Geräten.</p>
+                </div>
+                <div class="card p-6 text-center">
+                    <span class="text-4xl mb-3 block">🔄</span>
+                    <h3 class="text-xl font-semibold mb-2">Dynamisches Umschalten</h3>
+                    <p class="text-sm">Nahtloser Wechsel zwischen echten Sensordaten und simulierten Werten.</p>
+                </div>
+            </div>
+            <p class="text-center mt-6 text-[#5A5A5A]">Diese Funktionen arbeiten zusammen, um eine umfassende Standortanalyse für jede Pflanze zu ermöglichen.</p>
+        </section>
+
+        <section id="user-benefits" class="mb-12 md:mb-16">
+            <h2 class="text-3xl font-semibold section-title mb-8 text-center">Vorteile für den Nutzer</h2>
+            <div class="card p-8">
+                <ul class="space-y-4">
+                    <li class="flex items-start"><span class="text-2xl mr-3 text-[#B0C4B1]">🌿</span> <div><strong class="block">Gesündere Pflanzen:</strong> Optimale Lichtverhältnisse fördern Wachstum und Vitalität.</div></li>
+                    <li class="flex items-start"><span class="text-2xl mr-3 text-[#B0C4B1]">💡</span> <div><strong class="block">Weniger Rätselraten:</strong> Konkrete Daten statt vager Vermutungen.</div></li>
+                    <li class="flex items-start"><span class="text-2xl mr-3 text-[#B0C4B1]">🗓️</span> <div><strong class="block">Proaktive Planung:</strong> Den idealen Platz schon vor dem Kauf oder Umstellen finden.</div></li>
+                    <li class="flex items-start"><span class="text-2xl mr-3 text-[#B0C4B1]">🎓</span> <div><strong class="block">Lernwerkzeug:</strong> Besseres Verständnis für Lichtbedürfnisse und -verhältnisse entwickeln.</div></li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="tech-deep-dive" class="mb-12 md:mb-16">
+            <h2 class="text-3xl font-semibold section-title mb-8 text-center">Ein Blick unter die Haube: Technologie</h2>
+            <p class="text-lg mb-6 text-center max-w-3xl mx-auto">Der Prototyp nutzt moderne Web-Technologien, um direkt im Browser auf Gerätesensoren zuzugreifen. Dies ermöglicht schnelle Tests und eine breite Erreichbarkeit.</p>
+            <div class="card p-6">
+                <h3 class="text-xl font-semibold mb-4 text-center">Vereinfachter Datenfluss:</h3>
+                <div class="flex flex-col md:flex-row justify-around items-center space-y-4 md:space-y-0 md:space-x-2">
+                    <div class="flow-step"><span class="text-2xl">📱</span><p>Nutzeraktion</p></div>
+                    <div class="flow-arrow md:block hidden">➡️</div> <div class="flow-arrow md:hidden">⬇️</div>
+                    <div class="flow-step"><span class="text-2xl">🛰️</span><p>Sensor-API (Licht/Kompass)</p></div>
+                    <div class="flow-arrow md:block hidden">➡️</div> <div class="flow-arrow md:hidden">⬇️</div>
+                    <div class="flow-step"><span class="text-2xl">⚙️</span><p>JS Logik & Analyse</p></div>
+                    <div class="flow-arrow md:block hidden">➡️</div> <div class="flow-arrow md:hidden">⬇️</div>
+                    <div class="flow-step"><span class="text-2xl">📊</span><p>Ergebnis-Anzeige</p></div>
+                </div>
+                <p class="text-sm text-center mt-4 text-[#5A5A5A]">Kern-APIs: AmbientLightSensor, DeviceOrientationEvent, Geolocation (für zukünftige SunCalc-Integration).</p>
+            </div>
+        </section>
+
+        <section id="swot-analysis" class="mb-12 md:mb-16">
+            <h2 class="text-3xl font-semibold section-title mb-8 text-center">SWOT-Analyse: Pflanzen Planer Pro</h2>
+            <p class="text-lg mb-6 text-center max-w-3xl mx-auto">Eine Analyse der Stärken, Schwächen, Chancen und Risiken der App-Idee im aktuellen Markt für Pflanzenpflege-Technologien.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="card p-6 swot-category">
+                    <h3 class="text-2xl font-semibold mb-3">Stärken (Strengths) 💪</h3>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>Innovative, datengesteuerte Lösung für ein alltägliches Problem.</li>
+                        <li>Hoher Nutzen für eine wachsende Zielgruppe von Pflanzenliebhabern.</li>
+                        <li>Simulations-Modus ermöglicht breite Testbarkeit und Entwicklung.</li>
+                        <li>Potenzial für Community-Features und Lerninhalte.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 swot-category">
+                    <h3 class="text-2xl font-semibold mb-3">Schwächen (Weaknesses) ⚠️</h3>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>Abhängigkeit von Sensorverfügbarkeit und -genauigkeit in Browsern.</li>
+                        <li>Eingeschränkte Funktionalität auf iOS im Web-Browser (v.a. Lichtsensor).</li>
+                        <li>Aktuell reiner Prototyp ohne persistente Datenspeicherung.</li>
+                        <li>Design und UX noch nicht final optimiert.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 swot-category">
+                    <h3 class="text-2xl font-semibold mb-3">Chancen (Opportunities) 🚀</h3>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>Stark wachsender Markt für Zimmerpflanzen und Smart Gardening.</li>
+                        <li>Integration einer Pflanzendatenbank mit spezifischen Lichtbedürfnissen.</li>
+                        <li>Nutzung von SunCalc.js für präzise Sonnenverlaufs-Analysen.</li>
+                        <li>Entwicklung nativer Apps (iOS/Android) für vollen Sensorzugriff.</li>
+                        <li>Partnerschaften mit Pflanzenshops oder Garten-Influencern.</li>
+                    </ul>
+                </div>
+                <div class="card p-6 swot-category">
+                    <h3 class="text-2xl font-semibold mb-3">Risiken (Threats) 📉</h3>
+                    <ul class="list-disc list-inside space-y-1 text-sm">
+                        <li>Technische Limitierungen durch Browser-Updates oder neue OS-Restriktionen.</li>
+                        <li>Wettbewerb durch existierende Pflanzenpflege-Apps (ggf. mit ähnlichen Features).</li>
+                        <li>Herausforderung der Monetarisierung (falls angestrebt).</li>
+                        <li>Datenschutzbedenken bei Nutzung von Standortdaten (muss transparent gehandhabt werden).</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="future-vision" class="mb-12 md:mb-16">
+            <h2 class="text-3xl font-semibold section-title mb-8 text-center">Vision: Die Zukunft der intelligenten Pflanzenpflege</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold text-center mb-4">Geplante Feature-Erweiterungen</h3>
+                    <p class="text-sm text-center mb-4">Die folgende Grafik zeigt eine illustrative Priorisierung möglicher nächster Entwicklungsschritte basierend auf dem erwarteten Nutzermehrwert.</p>
+                    <div class="chart-container">
+                        <canvas id="futureFeaturesChart"></canvas>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-xl font-semibold mb-3">Schlüssel-Technologien für die nächste Stufe:</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li><strong>SunCalc.js:</strong> Für präzise, standort- und zeitbasierte Sonnenstands-Berechnungen.</li>
+                        <li><strong>Pflanzendatenbank:</strong> Strukturierte Speicherung von Pflanzenarten und deren spezifischen Lichtbedürfnissen (z.B. via JSON oder später Backend).</li>
+                        <li><strong>JavaScript Framework (z.B. React/Vue):</strong> Für eine robustere, skalierbare Codebasis und bessere UI-Komponenten.</li>
+                        <li><strong>Native Entwicklung (Swift/Kotlin) oder Cross-Platform (React Native/Flutter):</strong> Für vollen Sensorzugriff und App-Store-Präsenz.</li>
+                    </ul>
+                    <p class="mt-4 text-sm text-[#5A5A5A]">Die Integration dieser Elemente wird den "Pflanzen Planer Pro" zu einem unverzichtbaren Begleiter für jeden Pflanzenfreund machen.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="ios-path" class="mb-12 md:mb-16">
+            <h2 class="text-3xl font-semibold section-title mb-8 text-center">Der Weg zur professionellen iOS App</h2>
+            <p class="text-lg mb-6 text-center max-w-3xl mx-auto">Um das volle Potenzial auf iPhones auszuschöpfen, insbesondere den Zugriff auf den Lichtsensor, ist eine native oder Cross-Platform-App-Entwicklung unumgänglich. Der Web-Prototyp dient hier als wertvolle Blaupause.</p>
+            <div class="card p-6 overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead>
+                        <tr>
+                            <th class="w-1/3">Aspekt</th>
+                            <th class="w-1/3">Native iOS (Swift)</th>
+                            <th class="w-1/3">Cross-Platform (z.B. React Native)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Sensorzugriff</strong></td>
+                            <td>Optimal, voller Zugriff auf alle APIs (Licht, Kompass, etc.)</td>
+                            <td>Gut, meist voller Zugriff, ggf. über native Module/Brücken</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Performance</strong></td>
+                            <td>Sehr hoch, optimal für iOS</td>
+                            <td>Gut bis sehr gut, für diese App meist ausreichend</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Entwicklungsaufwand</strong></td>
+                            <td>Höher (separate Codebasis für iOS)</td>
+                            <td>Potenziell geringer (eine Codebasis für iOS/Android)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Code-Wiederverwendung (vom Web-Prototyp)</strong></td>
+                            <td>Logik-Konzepte übertragbar</td>
+                            <td>JavaScript-Logik teilweise direkt wiederverwendbar (bei React Native)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>iOS Look & Feel</strong></td>
+                            <td>Perfekte Integration</td>
+                            <td>Gute Integration, kann aber von nativ abweichen</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="text-sm text-center mt-4 text-[#5A5A5A]">Die Wahl hängt von Budget, Zeitplan und gewünschter Plattformabdeckung ab. Für beste iOS-Integration ist native Entwicklung oft der Goldstandard.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-[#5A5A5A] text-[#F8F7F3] py-8 px-4 text-center">
+        <p>&copy; 2024 Pflanzen Planer Pro Infografik. Basierend auf der Analyse des Web-Prototyps.</p>
+        <p class="text-sm">Erstellt mit Tailwind CSS und Chart.js.</p>
+    </footer>
+
+    <script>
+        const primaryAccent = '#B0C4B1'; // Soft Green
+        const secondaryAccent = '#A49E9E'; // Muted Taupe
+        const lightGrey = '#D8D8D8';
+        const darkGreyText = '#5A5A5A';
+
+        function wrapLabel(str, maxWidth = 16) {
+            if (typeof str !== 'string') return '';
+            if (str.length <= maxWidth) {
+                return str;
+            }
+            const words = str.split(' ');
+            let currentLine = '';
+            const lines = [];
+            for (const word of words) {
+                if ((currentLine + word).length > maxWidth && currentLine.length > 0) {
+                    lines.push(currentLine.trim());
+                    currentLine = word + ' ';
+                } else {
+                    currentLine += word + ' ';
+                }
+            }
+            lines.push(currentLine.trim());
+            return lines;
+        }
+        
+        const tooltipTitleCallback = (tooltipItems) => {
+            const item = tooltipItems[0];
+            if (!item || !item.chart || !item.chart.data || !item.chart.data.labels) return '';
+            let label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: { color: darkGreyText, font: { size: 12 } }
+                },
+                tooltip: {
+                    callbacks: { title: tooltipTitleCallback },
+                    bodyFont: { size: 12 },
+                    titleFont: { size: 13, weight: 'bold' }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: darkGreyText, font: { size: 11 } },
+                    grid: { color: lightGrey }
+                },
+                x: {
+                    ticks: { color: darkGreyText, font: { size: 11 } },
+                    grid: { color: 'transparent' }
+                }
+            }
+        };
+
+        // Future Features Chart (Donut)
+        const futureFeaturesCtx = document.getElementById('futureFeaturesChart');
+        if (futureFeaturesCtx) {
+            new Chart(futureFeaturesCtx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: [
+                        wrapLabel('Integrierte Pflanzendatenbank'), 
+                        wrapLabel('Echte Sonnenverlaufs-daten (SunCalc)'), 
+                        wrapLabel('Langzeit-messung'),
+                        wrapLabel('UI/UX Optimierung'),
+                        wrapLabel('Standort-empfehlungen')
+                    ],
+                    datasets: [{
+                        label: 'Priorität zukünftiger Features',
+                        data: [30, 25, 15, 20, 10], // Illustrative Prioritäten
+                        backgroundColor: [primaryAccent, secondaryAccent, '#C1A9A9', '#A7BEAE', '#E0E0E0'],
+                        borderColor: '#FFFFFF',
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { 
+                            position: 'bottom', 
+                            labels: { color: darkGreyText, padding: 15, boxWidth:10, font: {size: 10} } 
+                        },
+                        tooltip: { callbacks: { title: tooltipTitleCallback } }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
