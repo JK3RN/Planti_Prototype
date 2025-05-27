@@ -73,32 +73,34 @@
         simulationMode.addEventListener('change', () => {
             simulatorDiv.style.display = simulationMode.checked ? 'block' : 'none';
             if (simulationMode.checked) {
-                // Stoppe den echten Kompass-Listener, falls er läuft
                 window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
-                // Setze die Anzeigen auf die aktuellen Slider-Werte zurück
-                updateLight(luxSlider.value);
-                updateCompass(compassSlider.value);
+                updateLight(parseInt(luxSlider.value, 10)); 
+                // FIX: Den Wert vom Slider in eine Zahl umwandeln
+                updateCompass(parseInt(compassSlider.value, 10)); 
             }
         });
         luxSlider.addEventListener('input', () => {
             luxSliderValue.textContent = luxSlider.value;
-            if (simulationMode.checked) updateLight(luxSlider.value);
+            if (simulationMode.checked) updateLight(parseInt(luxSlider.value, 10)); // FIX: Auch hier umwandeln
         });
         compassSlider.addEventListener('input', () => {
             compassSliderValue.textContent = compassSlider.value;
-            if (simulationMode.checked) updateCompass(compassSlider.value);
+            // FIX: Den Wert vom Slider in eine Zahl umwandeln
+            if (simulationMode.checked) updateCompass(parseInt(compassSlider.value, 10));
         });
 
         // --- KERNLOGIK ---
         function updateLight(lux) {
-            let category = lux < 5000 ? 'Schattig' : (lux < 20000 ? 'Halbschatten' : 'Sonnig');
-            let emoji = lux < 5000 ? '🌒' : (lux < 20000 ? '⛅️' : '☀️');
-            resultDiv.innerHTML = `<div>${emoji} ${category}</div><div id="luxValue">${Math.round(lux)} Lux</div>`;
+            // Die Light-Funktion war nicht betroffen, da sie keine strenge Typ-Prüfung hatte,
+            // aber zur Sicherheit wandeln wir den Wert auch hier um.
+            let luxAsNumber = parseInt(lux, 10);
+            let category = luxAsNumber < 5000 ? 'Schattig' : (luxAsNumber < 20000 ? 'Halbschatten' : 'Sonnig');
+            let emoji = luxAsNumber < 5000 ? '🌒' : (luxAsNumber < 20000 ? '⛅️' : '☀️');
+            resultDiv.innerHTML = `<div>${emoji} ${category}</div><div id="luxValue">${Math.round(luxAsNumber)} Lux</div>`;
             errorDiv.innerHTML = '';
         }
 
         function handleOrientation(event) {
-            // Beende die Funktion, falls der Nutzer inzwischen in den Sim-Modus gewechselt hat
             if (simulationMode.checked) {
                 window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
                 return;
@@ -107,7 +109,8 @@
         }
 
         function updateCompass(heading) {
-            if (typeof heading !== 'number' || isNaN(heading)) return;
+            // Diese Funktion erwartet jetzt dank unserer Korrektur immer eine Zahl.
+            if (typeof heading !== 'number' || isNaN(heading)) return; 
             let direction = 'Norden';
             if (heading > 337.5 || heading <= 22.5) direction = 'Norden';
             else if (heading > 22.5 && heading <= 67.5) direction = 'Nord-Ost';
@@ -138,7 +141,7 @@
         // --- EVENT LISTENERS FÜR BUTTONS (JETZT MIT IF/ELSE) ---
         scanButton.addEventListener('click', () => {
             if (simulationMode.checked) {
-                updateLight(luxSlider.value);
+                updateLight(parseInt(luxSlider.value, 10)); // FIX: Den Wert vom Slider in eine Zahl umwandeln
             } else {
                 // MODUS: ECHTE SENSOREN
                 errorDiv.innerHTML = 'Sensor wird gestartet...';
@@ -171,7 +174,7 @@
 
         compassButton.addEventListener('click', () => {
             if (simulationMode.checked) {
-                updateCompass(compassSlider.value);
+                updateCompass(parseInt(compassSlider.value, 10)); // FIX: Den Wert vom Slider in eine Zahl umwandeln
             } else {
                 // MODUS: ECHTE SENSOREN
                 compassResultDiv.innerHTML = 'Bitte Standort freigeben...';
